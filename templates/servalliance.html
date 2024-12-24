@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>Cotton Plant Disease Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-green-100 min-h-screen flex flex-col">
+    <!-- Fixed Navbar -->
+    <nav class="fixed top-0 left-0 right-0 bg-blue-600 shadow-md w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="text-white font-bold text-lg flex items-center">
+                        <i class="fas fa-leaf mr-2"></i>
+                        Plant Health Detector
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex space-x-4">
+                    <a href="/" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                        <i class="fas fa-upload mr-2"></i>
+                        Upload a Photo
+                    </a>
+                    <a href="/servalliance" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                        <i class="fas fa-video mr-2"></i>
+                        Continuous Surveillance
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button 
+                        id="mobile-menu-toggle"
+                        class="text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white rounded-md p-2"
+                    >
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (Hidden by Default) -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="/" class="text-white block hover:bg-blue-700 px-3 py-2 rounded-md text-base font-medium flex items-center">
+                    <i class="fas fa-upload mr-2"></i>
+                    Upload a Photo
+                </a>
+                <a href="/servalliance" class="text-white block hover:bg-blue-700 px-3 py-2 rounded-md text-base font-medium flex items-center">
+                    <i class="fas fa-video mr-2"></i>
+                    Continuous Surveillance
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Disease Alert Modal -->
+    <div 
+        id="disease-modal" 
+        class="fixed inset-0 bg-black bg-opacity-50 z-[100] hidden flex items-center justify-center"
+    >
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-red-700">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Disease Detected!
+                </h2>
+                <button 
+                    id="close-modal" 
+                    class="text-gray-500 hover:text-gray-800 focus:outline-none"
+                >
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="text-center">
+                <p id="disease-details" class="mb-4 text-lg text-gray-700">
+                    A potential disease has been identified in your cotton plant.
+                </p>
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded mb-4">
+                    <p class="text-yellow-800">
+                        <strong>Recommended Action:</strong> 
+                        Consult with an agricultural expert for further diagnosis and treatment.
+                    </p>
+                </div>
+                <button 
+                    id="more-info" 
+                    class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300"
+                >
+                    Learn More About Cotton Diseases
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add padding to the top of the content to prevent navbar from covering it -->
+    <div class="flex-grow container mx-auto px-4 py-6 mt-16">
+        <div class="bg-white shadow-xl rounded-xl p-6 max-w-xl w-full mx-auto">
+            <h1 class="text-3xl font-bold text-center text-green-800 mb-6">
+                Cotton Plant Disease Detector
+            </h1>
+            
+            <div class="bg-gray-100 rounded-lg overflow-hidden shadow-md mb-6">
+                <video 
+                    id="video" 
+                    autoplay 
+                    class="w-full h-auto object-cover"
+                ></video>
+            </div>
+            
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                <p 
+                    id="result" 
+                    class="text-lg font-medium text-green-800"
+                >
+                    Initializing detection system...
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle functionality
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Modal elements
+        const diseaseModal = document.getElementById('disease-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const moreInfoBtn = document.getElementById('more-info');
+        const diseaseDetailsEl = document.getElementById('disease-details');
+
+        // Modal control functions
+        function showDiseaseModal(prediction, confidence) {
+            diseaseDetailsEl.textContent = `A potential ${prediction} disease has been detected with ${confidence.toFixed(2)}% confidence.`;
+            diseaseModal.classList.remove('hidden');
+        }
+
+        function hideDiseaseModal() {
+            diseaseModal.classList.add('hidden');
+        }
+
+        // Modal event listeners
+        closeModalBtn.addEventListener('click', hideDiseaseModal);
+        moreInfoBtn.addEventListener('click', () => {
+            // In a real app, this could link to an educational resource
+            window.open('https://example.com/cotton-plant-diseases', '_blank');
+        });
+
+        // Video and analysis code
+        const video = document.getElementById('video');
+        const resultText = document.getElementById('result');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        // Access the user's camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                video.addEventListener('loadedmetadata', () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    startAnalysis();
+                });
+            })
+            .catch(error => {
+                console.error('Error accessing camera:', error);
+                resultText.textContent = 'Error accessing camera. Please check permissions.';
+                resultText.classList.add('text-red-600');
+            });
+
+        function startAnalysis() {
+            setInterval(() => {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL('image/png');
+
+                fetch('/analyze-frame', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: imageData }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const predictionText = `Prediction: ${data.prediction}, Confidence: ${data.confidence.toFixed(2)}%`;
+                    resultText.textContent = predictionText;
+                    
+                    // Add color coding for confidence
+                    if (data.confidence > 80) {
+                        resultText.classList.remove('text-yellow-600', 'text-red-600');
+                        resultText.classList.add('text-green-700');
+                    } else if (data.confidence > 50) {
+                        resultText.classList.remove('text-green-700', 'text-red-600');
+                        resultText.classList.add('text-yellow-600');
+                    } else {
+                        resultText.classList.remove('text-green-700', 'text-yellow-600');
+                        resultText.classList.add('text-red-600');
+                    }
+
+                    // Show modal for diseased plants with confidence > 50%
+                    if (data.prediction.toLowerCase().includes('disease') && data.confidence > 50) {
+                        showDiseaseModal(data.prediction, data.confidence);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error analyzing frame:', error);
+                    resultText.textContent = 'Error analyzing frame. Please try again.';
+                    resultText.classList.add('text-red-600');
+                });
+            }, 1000); // Analyze frame every second
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Fixed Navbar -->
+    <nav class="fixed top-0 left-0 right-0 bg-blue-600 shadow-md z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-white font-bold text-lg flex items-center">
+                        <i class="fas fa-leaf mr-2"></i>Plant Health Detector
+                    </a>
+                </div>
+                <div class="hidden md:flex space-x-4">
+                    <a href="/" class="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 flex items-center">
+                        <i class="fas fa-upload mr-2"></i>Upload a Photo
+                    </a>
+                    <a href="/servalliance" class="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 flex items-center">
+                        <i class="fas fa-video mr-2"></i>Continuous Surveillance
+                    </a>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-toggle" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-blue-700 focus:outline-none">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="/" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 flex items-center">
+                    <i class="fas fa-upload mr-2"></i>Upload a Photo
+                </a>
+                <a href="/servalliance" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 flex items-center">
+                    <i class="fas fa-video mr-2"></i>Continuous Surveillance
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content with Top Padding -->
+    <div class="flex-grow flex items-center justify-center p-4 mt-16">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-4xl text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Prediction Result</h1>
+            
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Uploaded Image</h3>
+                <div class="flex justify-center mb-6">
+                    <img
+                        src="{{ url_for('static', filename='user_uploaded/' + user_image) }}"
+                        alt="Uploaded Image"
+                        class="max-w-full h-auto max-h-96 rounded-lg shadow-md"
+                    >
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold {% if 'Diseased' in pred_output %}text-red-600{% else %}text-green-600{% endif %}">
+                    {{ pred_output }}
+                </h3>
+                {% if confidence %}
+                <p class="text-gray-600 mt-2">
+                    Confidence: {{ confidence }}%
+                </p>
+                {% endif %}
+            </div>
+            
+            <a 
+                href="/"
+                class="inline-block bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition duration-300 ease-in-out"
+            >
+                Upload Another Image
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle functionality
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
